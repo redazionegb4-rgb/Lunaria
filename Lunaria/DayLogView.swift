@@ -37,7 +37,7 @@ struct DayLogView: View {
                                                 .font(.subheadline.weight(.semibold))
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                                 .padding(12)
-                                                .background(symptoms.contains(symptom) ? Color.lunariaPink.opacity(0.18) : Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 15))
+                                                .background(symptoms.contains(symptom) ? Color.lunariaRose.opacity(0.18) : Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 15))
                                         }
                                         .buttonStyle(.plain)
                                     }

@@ -36,7 +36,7 @@ struct InsightsView: View {
                                 } else {
                                     Chart(symptomCounts, id: \.0) { item in
                                         BarMark(x: .value("Sintomo", item.0), y: .value("Volte", item.1))
-                                            .foregroundStyle(LinearGradient(colors: [Color.lunariaPink, Color.lunariaViolet], startPoint: .bottom, endPoint: .top))
+                                            .foregroundStyle(LinearGradient(colors: [Color.lunariaRose, Color.lunariaPlum], startPoint: .bottom, endPoint: .top))
                                     }
                                     .frame(height: 250)
                                 }

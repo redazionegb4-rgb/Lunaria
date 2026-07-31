@@ -1,67 +1,46 @@
 import SwiftUI
 
 extension Color {
-    static let lunariaPink = Color(red: 0.97, green: 0.33, blue: 0.57)
-    static let lunariaViolet = Color(red: 0.53, green: 0.35, blue: 0.96)
-    static let lunariaBlue = Color(red: 0.30, green: 0.68, blue: 1.00)
+    static let lunariaCoral = Color(red: 1.00, green: 0.34, blue: 0.48)
+    static let lunariaRose = Color(red: 0.92, green: 0.20, blue: 0.48)
+    static let lunariaPlum = Color(red: 0.47, green: 0.20, blue: 0.58)
+    static let lunariaCream = Color(red: 1.00, green: 0.97, blue: 0.96)
 }
 
 struct LiquidBackground: View {
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.lunariaViolet.opacity(0.28), Color.lunariaPink.opacity(0.20), Color.lunariaBlue.opacity(0.18)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            Circle()
-                .fill(Color.lunariaPink.opacity(0.22))
-                .frame(width: 280, height: 280)
-                .blur(radius: 35)
-                .offset(x: 130, y: -260)
-
-            Circle()
-                .fill(Color.lunariaBlue.opacity(0.20))
-                .frame(width: 240, height: 240)
-                .blur(radius: 40)
-                .offset(x: -150, y: 310)
+            Color(.systemGroupedBackground).ignoresSafeArea()
+            LinearGradient(colors: [.lunariaCream, .lunariaCoral.opacity(0.10), .lunariaPlum.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
+            Circle().fill(Color.lunariaCoral.opacity(0.18)).frame(width: 320, height: 320).blur(radius: 55).offset(x: 150, y: -300)
+            Circle().fill(Color.lunariaPlum.opacity(0.13)).frame(width: 300, height: 300).blur(radius: 60).offset(x: -170, y: 360)
         }
     }
 }
 
 struct GlassCard<Content: View>: View {
+    let padding: CGFloat
     let content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
+    init(padding: CGFloat = 18, @ViewBuilder content: () -> Content) { self.padding = padding; self.content = content() }
     var body: some View {
-        content
-            .padding(18)
+        content.padding(padding)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(.white.opacity(0.28), lineWidth: 1)
-            }
-            .shadow(color: .black.opacity(0.08), radius: 20, y: 10)
+            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.55), lineWidth: 1))
+            .shadow(color: Color.lunariaPlum.opacity(0.10), radius: 24, y: 12)
     }
 }
 
 struct GradientButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                LinearGradient(colors: [Color.lunariaPink, Color.lunariaViolet], startPoint: .leading, endPoint: .trailing),
-                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-            )
+        configuration.label.font(.headline).foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 16)
+            .background(LinearGradient(colors: [.lunariaCoral, .lunariaRose, .lunariaPlum], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(color: Color.lunariaRose.opacity(0.25), radius: 14, y: 8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .opacity(configuration.isPressed ? 0.88 : 1)
     }
+}
+
+struct StatusPill: View {
+    let text: String
+    let icon: String
+    var body: some View { Label(text, systemImage: icon).font(.caption.weight(.semibold)).padding(.horizontal, 12).padding(.vertical, 8).background(.thinMaterial, in: Capsule()) }
 }
