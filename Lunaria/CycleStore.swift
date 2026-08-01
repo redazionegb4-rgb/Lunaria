@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor
-final class CycleStore: ObservableObject {
+final class CycleStore: NSObject, ObservableObject {
     @Published var hasCompletedOnboarding: Bool { didSet { persist() } }
     @Published var userName: String { didSet { persist() } }
     @Published var settings: CycleSettings { didSet { persist() } }
@@ -18,7 +18,7 @@ final class CycleStore: ObservableObject {
     private let cloudKey = "lunaria.cloud.backup.v1"
     private var isRestoring = false
 
-    init() {
+    override init() {
         hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
         userName = defaults.string(forKey: "userName") ?? ""
         notificationsEnabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
@@ -43,14 +43,23 @@ final class CycleStore: ObservableObject {
         }
         lastCloudSync = defaults.object(forKey: "lastCloudSync") as? Date
 
-        NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud, queue: .main) { [weak self] _ in
-            Task { @MainActor in self?.restoreFromICloud(silent: true) }
-        }
+        super.init()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(iCloudStoreDidChange(_:)),
+            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+            object: cloud
+        )
         cloud.synchronize()
         restoreFromICloud(silent: true)
     }
 
     deinit { NotificationCenter.default.removeObserver(self) }
+
+    @objc private func iCloudStoreDidChange(_ notification: Notification) {
+        restoreFromICloud(silent: true)
+    }
 
     private func persist() {
         guard !isRestoring else { return }

@@ -1,5 +1,11 @@
-# Lunaria 0.5
+# Lunaria iOS v0.5.3
 
-Nuovo design completo e backup automatico iCloud tramite NSUbiquitousKeyValueStore.
+Correzioni:
+- risolto l'errore Swift 6 "Reference to captured var 'self' in concurrently-executing code" in CycleStore;
+- ripristinata l'icona precedente con goccia bianca su sfondo rosa/prugna;
+- mantenuto il backup automatico tramite iCloud Key-Value Storage.
 
-Prima dell'archiviazione, in Xcode seleziona il target Lunaria > Signing & Capabilities e verifica che sia presente la capability **iCloud** con **Key-value storage** attivo. Il file `Lunaria.entitlements` è già incluso e collegato al target.
+Prima di compilare:
+1. Seleziona il target Lunaria > Signing & Capabilities.
+2. Mantieni attivo iCloud > Key-value storage.
+3. Esegui Product > Clean Build Folder.
