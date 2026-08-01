@@ -23,9 +23,24 @@ final class CycleStore: ObservableObject {
         userName = defaults.string(forKey: "userName") ?? ""
         notificationsEnabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
         appearance = AppAppearance(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
-        settings = (defaults.data(forKey: "cycleSettings").flatMap { try? decoder.decode(CycleSettings.self, from: $0) })
-            ?? CycleSettings(lastPeriodStart: Calendar.current.date(byAdding: .day, value: -9, to: Date()) ?? Date(), averageCycleLength: 28, averagePeriodLength: 5)
-        logs = (defaults.data(forKey: "dayLogs").flatMap { try? decoder.decode([String: DayLog].self, from: $0) }) ?? [:]
+        let startupDecoder = JSONDecoder()
+        if let settingsData = defaults.data(forKey: "cycleSettings"),
+           let savedSettings = try? startupDecoder.decode(CycleSettings.self, from: settingsData) {
+            settings = savedSettings
+        } else {
+            settings = CycleSettings(
+                lastPeriodStart: Calendar.current.date(byAdding: .day, value: -9, to: Date()) ?? Date(),
+                averageCycleLength: 28,
+                averagePeriodLength: 5
+            )
+        }
+
+        if let logsData = defaults.data(forKey: "dayLogs"),
+           let savedLogs = try? startupDecoder.decode([String: DayLog].self, from: logsData) {
+            logs = savedLogs
+        } else {
+            logs = [:]
+        }
         lastCloudSync = defaults.object(forKey: "lastCloudSync") as? Date
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud, queue: .main) { [weak self] _ in
