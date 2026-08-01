@@ -1,15 +1,11 @@
-# Lunaria – iOS
+# Lunaria iOS v0.4
 
-Prima build SwiftUI di un'app per il monitoraggio del ciclo mestruale, in italiano e con interfaccia Liquid Glass.
+Aggiornamenti:
+- nome obbligatorio durante il primo avvio
+- saluto personalizzato nella Home
+- mesi e giorni forzati in italiano
+- modifica del nome dalle Impostazioni
+- backup completo esportabile nell'app File/iCloud Drive
+- ripristino del backup
 
-## Requisiti
-- Xcode 16 o successivo
-- iOS 17.0 o successivo
-
-## Avvio
-1. Apri `Lunaria.xcodeproj`.
-2. Seleziona il tuo Team in **Signing & Capabilities**.
-3. Cambia il Bundle Identifier se necessario.
-4. Avvia su simulatore o iPhone.
-
-I dati sono salvati localmente con UserDefaults. Le notifiche sono predisposte graficamente ma non ancora collegate a UNUserNotificationCenter in questa prima build.
+Apri `Lunaria.xcodeproj` con Xcode, seleziona il Team e avvia il progetto.

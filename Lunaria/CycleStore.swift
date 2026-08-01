@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 final class CycleStore: ObservableObject {
     @Published var hasCompletedOnboarding: Bool { didSet { save() } }
+    @Published var userName: String { didSet { save() } }
     @Published var settings: CycleSettings { didSet { save() } }
     @Published var logs: [String: DayLog] { didSet { save() } }
     @Published var appearance: AppAppearance { didSet { save() } }
@@ -14,6 +15,7 @@ final class CycleStore: ObservableObject {
 
     init() {
         hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
+        userName = defaults.string(forKey: "userName") ?? ""
         notificationsEnabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
         appearance = AppAppearance(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
 
@@ -38,6 +40,7 @@ final class CycleStore: ObservableObject {
 
     func save() {
         defaults.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding")
+        defaults.set(userName, forKey: "userName")
         defaults.set(notificationsEnabled, forKey: "notificationsEnabled")
         defaults.set(appearance.rawValue, forKey: "appearance")
         defaults.set(try? encoder.encode(settings), forKey: "cycleSettings")
@@ -60,16 +63,45 @@ final class CycleStore: ObservableObject {
         logs[log.dateKey] = log
     }
 
+    func italianDate(_ date: Date, abbreviated: Bool = false) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "it_IT")
+        formatter.dateFormat = abbreviated ? "d MMM" : "d MMMM"
+        return formatter.string(from: date).capitalized
+    }
+
+    var backup: LunariaBackup {
+        LunariaBackup(
+            version: 1,
+            createdAt: Date(),
+            userName: userName,
+            settings: settings,
+            logs: logs,
+            appearance: appearance,
+            notificationsEnabled: notificationsEnabled
+        )
+    }
+
+    func restore(from backup: LunariaBackup) {
+        userName = backup.userName
+        settings = backup.settings
+        logs = backup.logs
+        appearance = backup.appearance
+        notificationsEnabled = backup.notificationsEnabled
+        hasCompletedOnboarding = true
+        save()
+    }
+
     var nextPeriodStart: Date {
         Calendar.current.date(byAdding: .day, value: settings.averageCycleLength, to: settings.lastPeriodStart) ?? Date()
     }
 
     var fertileStart: Date {
-        Calendar.current.date(byAdding: .day, value: -14 - 5, to: nextPeriodStart) ?? Date()
+        Calendar.current.date(byAdding: .day, value: -19, to: nextPeriodStart) ?? Date()
     }
 
     var fertileEnd: Date {
-        Calendar.current.date(byAdding: .day, value: -14 + 1, to: nextPeriodStart) ?? Date()
+        Calendar.current.date(byAdding: .day, value: -13, to: nextPeriodStart) ?? Date()
     }
 
     var daysUntilNextPeriod: Int {
@@ -82,6 +114,7 @@ final class CycleStore: ObservableObject {
 
     func resetAll() {
         logs = [:]
+        userName = ""
         settings = CycleSettings(lastPeriodStart: Date(), averageCycleLength: 28, averagePeriodLength: 5)
         hasCompletedOnboarding = false
     }

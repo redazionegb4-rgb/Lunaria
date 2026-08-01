@@ -1,5 +1,10 @@
 import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
+
+extension UTType {
+    static let lunariaBackup = UTType(exportedAs: "com.dmb.lunaria.backup", conformingTo: .json)
+}
 
 enum AppAppearance: String, CaseIterable, Codable, Identifiable {
     case system = "Automatico"
@@ -62,4 +67,38 @@ struct CycleSettings: Codable {
     var lastPeriodStart: Date
     var averageCycleLength: Int
     var averagePeriodLength: Int
+}
+
+struct LunariaBackup: Codable {
+    let version: Int
+    let createdAt: Date
+    let userName: String
+    let settings: CycleSettings
+    let logs: [String: DayLog]
+    let appearance: AppAppearance
+    let notificationsEnabled: Bool
+}
+
+struct LunariaBackupDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.lunariaBackup, .json] }
+
+    var backup: LunariaBackup
+
+    init(backup: LunariaBackup) {
+        self.backup = backup
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        backup = try JSONDecoder().decode(LunariaBackup.self, from: data)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return FileWrapper(regularFileWithContents: try encoder.encode(backup))
+    }
 }

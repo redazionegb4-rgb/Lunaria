@@ -35,7 +35,7 @@ struct HomeView: View {
     private var header: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Ciao").font(.subheadline).foregroundStyle(.secondary)
+                Text(store.userName.isEmpty ? "Ciao" : "Ciao, \(store.userName)").font(.subheadline).foregroundStyle(.secondary)
                 Text("Come ti senti oggi?").font(.system(size: 28, weight: .bold, design: .rounded))
             }
             Spacer()
@@ -67,7 +67,7 @@ struct HomeView: View {
 
     private var quickGrid: some View {
         HStack(spacing: 12) {
-            metric(title: "Prossimo ciclo", value: store.nextPeriodStart.formatted(.dateTime.day().month(.abbreviated)), icon: "calendar", tint: .lunariaRose)
+            metric(title: "Prossimo ciclo", value: store.italianDate(store.nextPeriodStart, abbreviated: true), icon: "calendar", tint: .lunariaRose)
             metric(title: "Durata media", value: "\(store.settings.averageCycleLength) giorni", icon: "arrow.triangle.2.circlepath", tint: .lunariaPlum)
         }
     }
@@ -88,7 +88,7 @@ struct HomeView: View {
                 Image(systemName: "leaf.fill").font(.title3).foregroundStyle(.green).frame(width: 46, height: 46).background(.green.opacity(0.12), in: Circle())
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Finestra fertile stimata").font(.headline)
-                    Text("\(store.fertileStart.formatted(.dateTime.day().month(.abbreviated))) – \(store.fertileEnd.formatted(.dateTime.day().month(.abbreviated)))").foregroundStyle(.secondary)
+                    Text("\(store.italianDate(store.fertileStart, abbreviated: true)) – \(store.italianDate(store.fertileEnd, abbreviated: true))").foregroundStyle(.secondary)
                 }
                 Spacer(); Image(systemName: "chevron.right").foregroundStyle(.tertiary)
             }

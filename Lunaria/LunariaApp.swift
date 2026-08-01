@@ -9,6 +9,7 @@ struct LunariaApp: App {
             RootView()
                 .environmentObject(store)
                 .preferredColorScheme(store.appearance.colorScheme)
+                .environment(\.locale, Locale(identifier: "it_IT"))
         }
     }
 }
