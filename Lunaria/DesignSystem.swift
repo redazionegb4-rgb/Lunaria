@@ -1,46 +1,83 @@
 import SwiftUI
 
 extension Color {
-    static let lunariaCoral = Color(red: 1.00, green: 0.34, blue: 0.48)
-    static let lunariaRose = Color(red: 0.92, green: 0.20, blue: 0.48)
-    static let lunariaPlum = Color(red: 0.47, green: 0.20, blue: 0.58)
-    static let lunariaCream = Color(red: 1.00, green: 0.97, blue: 0.96)
+    static let lunaInk = Color(red: 0.18, green: 0.08, blue: 0.22)
+    static let lunaBerry = Color(red: 0.77, green: 0.16, blue: 0.42)
+    static let lunaBlush = Color(red: 1.00, green: 0.43, blue: 0.55)
+    static let lunaLilac = Color(red: 0.61, green: 0.42, blue: 0.88)
+    static let lunaMist = Color(red: 0.98, green: 0.94, blue: 0.97)
 }
 
-struct LiquidBackground: View {
+struct AuraBackground: View {
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground).ignoresSafeArea()
-            LinearGradient(colors: [.lunariaCream, .lunariaCoral.opacity(0.10), .lunariaPlum.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
-            Circle().fill(Color.lunariaCoral.opacity(0.18)).frame(width: 320, height: 320).blur(radius: 55).offset(x: 150, y: -300)
-            Circle().fill(Color.lunariaPlum.opacity(0.13)).frame(width: 300, height: 300).blur(radius: 60).offset(x: -170, y: 360)
+            Color(.systemBackground).ignoresSafeArea()
+            LinearGradient(
+                colors: [Color.lunaMist, Color.lunaBlush.opacity(0.10), Color.lunaLilac.opacity(0.11)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ).ignoresSafeArea()
+            Circle().fill(Color.lunaBlush.opacity(0.22)).frame(width: 360, height: 360).blur(radius: 75).offset(x: 190, y: -330)
+            Circle().fill(Color.lunaLilac.opacity(0.17)).frame(width: 330, height: 330).blur(radius: 80).offset(x: -190, y: 330)
         }
     }
 }
 
-struct GlassCard<Content: View>: View {
-    let padding: CGFloat
-    let content: Content
-    init(padding: CGFloat = 18, @ViewBuilder content: () -> Content) { self.padding = padding; self.content = content() }
+struct FrostCard<Content: View>: View {
+    var radius: CGFloat = 28
+    var padding: CGFloat = 20
+    @ViewBuilder var content: Content
+
     var body: some View {
-        content.padding(padding)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.55), lineWidth: 1))
-            .shadow(color: Color.lunariaPlum.opacity(0.10), radius: 24, y: 12)
+        content
+            .padding(padding)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .stroke(LinearGradient(colors: [.white.opacity(0.85), .white.opacity(0.18)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+            }
+            .shadow(color: Color.lunaInk.opacity(0.09), radius: 24, y: 12)
     }
 }
 
-struct GradientButtonStyle: ButtonStyle {
+struct PrimaryLunaButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.headline).foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 16)
-            .background(LinearGradient(colors: [.lunariaCoral, .lunariaRose, .lunariaPlum], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.lunariaRose.opacity(0.25), radius: 14, y: 8)
+        configuration.label
+            .font(.headline)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(
+                LinearGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac], startPoint: .leading, endPoint: .trailing),
+                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+            )
+            .shadow(color: Color.lunaBerry.opacity(0.24), radius: 16, y: 8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
 }
 
-struct StatusPill: View {
-    let text: String
+struct LunaBadge: View {
+    let title: String
     let icon: String
-    var body: some View { Label(text, systemImage: icon).font(.caption.weight(.semibold)).padding(.horizontal, 12).padding(.vertical, 8).background(.thinMaterial, in: Capsule()) }
+    var tint: Color = .lunaBerry
+
+    var body: some View {
+        Label(title, systemImage: icon)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(tint)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(tint.opacity(0.11), in: Capsule())
+    }
+}
+
+struct SectionHeader: View {
+    let title: String
+    var subtitle: String? = nil
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title).font(.title3.bold())
+            if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(.secondary) }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
 }

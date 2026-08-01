@@ -1,11 +1,5 @@
-# Lunaria iOS v0.4
+# Lunaria 0.5
 
-Aggiornamenti:
-- nome obbligatorio durante il primo avvio
-- saluto personalizzato nella Home
-- mesi e giorni forzati in italiano
-- modifica del nome dalle Impostazioni
-- backup completo esportabile nell'app File/iCloud Drive
-- ripristino del backup
+Nuovo design completo e backup automatico iCloud tramite NSUbiquitousKeyValueStore.
 
-Apri `Lunaria.xcodeproj` con Xcode, seleziona il Team e avvia il progetto.
+Prima dell'archiviazione, in Xcode seleziona il target Lunaria > Signing & Capabilities e verifica che sia presente la capability **iCloud** con **Key-value storage** attivo. Il file `Lunaria.entitlements` è già incluso e collegato al target.

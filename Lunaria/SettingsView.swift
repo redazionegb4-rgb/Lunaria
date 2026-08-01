@@ -3,118 +3,60 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var store: CycleStore
     @State private var showReset = false
-    @State private var showExporter = false
-    @State private var showImporter = false
-    @State private var backupDocument: LunariaBackupDocument?
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-    @State private var showResultAlert = false
+    @State private var showCloudAlert = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                LiquidBackground()
-                Form {
-                    Section("Profilo") {
-                        TextField("Nome", text: $store.userName)
-                            .textInputAutocapitalization(.words)
-                    }
-
-                    Section("Ciclo") {
-                        DatePicker("Ultimo inizio", selection: $store.settings.lastPeriodStart, in: ...Date(), displayedComponents: .date)
-                        Stepper("Durata ciclo: \(store.settings.averageCycleLength) giorni", value: $store.settings.averageCycleLength, in: 20...45)
-                        Stepper("Durata mestruazioni: \(store.settings.averagePeriodLength) giorni", value: $store.settings.averagePeriodLength, in: 2...10)
-                    }
-
-                    Section("Preferenze") {
-                        Picker("Aspetto", selection: $store.appearance) {
-                            ForEach(AppAppearance.allCases) { Text($0.rawValue).tag($0) }
+                AuraBackground()
+                ScrollView {
+                    VStack(spacing: 20) {
+                        profileHeader
+                        settingsCard(title: "Il tuo ciclo", icon: "calendar.badge.clock") {
+                            DatePicker("Ultimo inizio", selection: $store.settings.lastPeriodStart, in: ...Date(), displayedComponents: .date)
+                            Divider()
+                            Stepper("Durata ciclo: \(store.settings.averageCycleLength) giorni", value: $store.settings.averageCycleLength, in: 20...45)
+                            Divider()
+                            Stepper("Mestruazioni: \(store.settings.averagePeriodLength) giorni", value: $store.settings.averagePeriodLength, in: 2...10)
                         }
-                        Toggle("Promemoria", isOn: $store.notificationsEnabled)
-                    }
-
-                    Section("Backup") {
-                        Button {
-                            backupDocument = LunariaBackupDocument(backup: store.backup)
-                            showExporter = true
-                        } label: {
-                            Label("Crea backup", systemImage: "square.and.arrow.up")
+                        settingsCard(title: "iCloud", icon: "icloud.fill") {
+                            HStack { VStack(alignment: .leading, spacing: 3) { Text("Backup automatico").font(.headline); Text(store.cloudStatus).font(.caption).foregroundStyle(.secondary) }; Spacer(); Image(systemName: "checkmark.icloud.fill").font(.title2).foregroundStyle(.green) }
+                            if let date = store.lastCloudSync { Text("Ultimo aggiornamento: \(store.italianDate(date, style: "d MMMM, HH:mm"))").font(.caption).foregroundStyle(.secondary) }
+                            Divider()
+                            Button { store.syncToICloud(); showCloudAlert = true } label: { Label("Esegui backup adesso", systemImage: "arrow.triangle.2.circlepath.icloud") }
+                            Divider()
+                            Button { store.restoreFromICloud(); showCloudAlert = true } label: { Label("Ripristina da iCloud", systemImage: "icloud.and.arrow.down") }
+                            Text("I dati vengono salvati nel tuo account iCloud e ripristinati automaticamente sugli altri iPhone con lo stesso Apple ID.").font(.caption).foregroundStyle(.secondary)
                         }
-
-                        Button {
-                            showImporter = true
-                        } label: {
-                            Label("Ripristina backup", systemImage: "square.and.arrow.down")
+                        settingsCard(title: "Preferenze", icon: "slider.horizontal.3") {
+                            Picker("Aspetto", selection: $store.appearance) { ForEach(AppAppearance.allCases) { Text($0.rawValue).tag($0) } }
+                            Divider(); Toggle("Promemoria", isOn: $store.notificationsEnabled)
                         }
-
-                        Text("Il backup contiene profilo, impostazioni del ciclo e giornate registrate. Puoi salvarlo su iCloud Drive o nell’app File.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Section("Privacy e salute") {
-                        Label("Dati salvati localmente", systemImage: "iphone.gen3.lock")
-                        Label("Previsioni solo indicative", systemImage: "cross.case.fill")
-                    }
-
-                    Section {
-                        Button("Azzera tutti i dati", role: .destructive) { showReset = true }
-                    }
+                        settingsCard(title: "Privacy", icon: "lock.shield.fill") {
+                            Label("Nessun account richiesto", systemImage: "person.crop.circle.badge.checkmark")
+                            Divider(); Label("Dati protetti da iCloud", systemImage: "icloud.fill")
+                            Divider(); Label("Previsioni indicative", systemImage: "cross.case.fill")
+                        }
+                        Button("Azzera tutti i dati", role: .destructive) { showReset = true }.font(.headline).padding(.top, 4)
+                    }.padding(18).padding(.bottom, 105)
                 }
-                .scrollContentBackground(.hidden)
-            }
-            .navigationTitle("Impostazioni")
-            .environment(\.locale, Locale(identifier: "it_IT"))
-            .fileExporter(
-                isPresented: $showExporter,
-                document: backupDocument,
-                contentType: .lunariaBackup,
-                defaultFilename: "Backup-Lunaria"
-            ) { result in
-                switch result {
-                case .success:
-                    showMessage(title: "Backup creato", message: "I dati di Lunaria sono stati esportati correttamente.")
-                case .failure(let error):
-                    showMessage(title: "Backup non creato", message: error.localizedDescription)
-                }
-            }
-            .fileImporter(
-                isPresented: $showImporter,
-                allowedContentTypes: [.lunariaBackup, .json],
-                allowsMultipleSelection: false
-            ) { result in
-                do {
-                    let urls = try result.get()
-                    guard let url = urls.first else { return }
-                    let access = url.startAccessingSecurityScopedResource()
-                    defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    let data = try Data(contentsOf: url)
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let backup = try decoder.decode(LunariaBackup.self, from: data)
-                    store.restore(from: backup)
-                    showMessage(title: "Backup ripristinato", message: "Tutti i dati sono stati importati correttamente.")
-                } catch {
-                    showMessage(title: "Backup non valido", message: "Il file selezionato non può essere ripristinato.")
-                }
-            }
-            .alert("Azzera Lunaria?", isPresented: $showReset) {
-                Button("Annulla", role: .cancel) {}
-                Button("Azzera", role: .destructive) { store.resetAll() }
-            } message: {
-                Text("Tutti i dati registrati verranno eliminati dal dispositivo.")
-            }
-            .alert(alertTitle, isPresented: $showResultAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(alertMessage)
+            }.toolbar(.hidden, for: .navigationBar)
+            .alert("iCloud", isPresented: $showCloudAlert) { Button("OK") {} } message: { Text(store.cloudStatus) }
+            .alert("Azzera Lunaria?", isPresented: $showReset) { Button("Annulla", role: .cancel) {}; Button("Azzera", role: .destructive) { store.resetAll() } } message: { Text("Tutti i dati locali verranno eliminati e il backup iCloud verrà aggiornato.") }
+        }
+    }
+
+    private var profileHeader: some View {
+        FrostCard(radius: 32, padding: 22) {
+            HStack(spacing: 16) {
+                ZStack { Circle().fill(LinearGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac], startPoint: .topLeading, endPoint: .bottomTrailing)); Image(systemName: "moon.stars.fill").font(.title).foregroundStyle(.white) }.frame(width: 64, height: 64)
+                VStack(alignment: .leading, spacing: 5) { Text("Il tuo profilo").font(.caption.bold()).foregroundStyle(.lunaBerry); TextField("Nome", text: $store.userName).font(.title2.bold()).textInputAutocapitalization(.words) }
+                Spacer()
             }
         }
     }
 
-    private func showMessage(title: String, message: String) {
-        alertTitle = title
-        alertMessage = message
-        showResultAlert = true
+    private func settingsCard<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
+        FrostCard(radius: 28, padding: 20) { VStack(alignment: .leading, spacing: 14) { Label(title, systemImage: icon).font(.title3.bold()).foregroundStyle(.lunaInk); content() }.frame(maxWidth: .infinity, alignment: .leading) }
     }
 }

@@ -4,112 +4,41 @@ struct OnboardingView: View {
     @EnvironmentObject private var store: CycleStore
     @State private var page = 0
     @State private var name = ""
-    @State private var lastPeriod = Date()
+    @State private var lastStart = Date()
     @State private var cycleLength = 28
     @State private var periodLength = 5
-    @FocusState private var nameFieldFocused: Bool
 
     var body: some View {
         ZStack {
-            LiquidBackground()
-            VStack(spacing: 18) {
-                HStack {
-                    Text("Lunaria").font(.system(size: 30, weight: .bold, design: .rounded))
-                    Spacer()
-                    Text("\(page + 1) di 4").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-                }
-
+            AuraBackground()
+            VStack(spacing: 0) {
+                HStack { ForEach(0..<3) { index in Capsule().fill(index <= page ? Color.lunaBerry : Color.primary.opacity(0.10)).frame(height: 5) } }.padding(.horizontal, 24).padding(.top, 14)
                 TabView(selection: $page) {
-                    welcome.tag(0)
-                    profile.tag(1)
-                    setup.tag(2)
-                    privacy.tag(3)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-
-                HStack(spacing: 8) {
-                    ForEach(0..<4) { index in
-                        Capsule()
-                            .fill(index == page ? Color.lunariaRose : Color.primary.opacity(0.12))
-                            .frame(width: index == page ? 28 : 8, height: 8)
-                    }
-                }
-                .animation(.spring, value: page)
-
-                Button(page == 3 ? "Entra in Lunaria" : "Continua") {
-                    if page == 1 && name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        nameFieldFocused = true
-                        return
-                    }
-                    if page < 3 {
-                        withAnimation { page += 1 }
-                    } else {
-                        store.userName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-                        store.settings = CycleSettings(lastPeriodStart: lastPeriod, averageCycleLength: cycleLength, averagePeriodLength: periodLength)
-                        store.hasCompletedOnboarding = true
-                    }
-                }
-                .buttonStyle(GradientButtonStyle())
+                    welcome.tag(0); profile.tag(1); cycle.tag(2)
+                }.tabViewStyle(.page(indexDisplayMode: .never))
+                Button(action: next) { Text(page == 2 ? "Inizia con Lunaria" : "Continua").frame(maxWidth: .infinity) }.buttonStyle(PrimaryLunaButtonStyle()).disabled(page == 1 && name.trimmingCharacters(in: .whitespaces).isEmpty).opacity(page == 1 && name.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1).padding(22)
             }
-            .padding(22)
         }
-        .environment(\.locale, Locale(identifier: "it_IT"))
     }
 
     private var welcome: some View {
         VStack(spacing: 26) {
             Spacer()
-            ZStack {
-                Circle().fill(LinearGradient(colors: [.lunariaCoral, .lunariaRose, .lunariaPlum], startPoint: .topLeading, endPoint: .bottomTrailing)).frame(width: 160, height: 160).shadow(color: Color.lunariaRose.opacity(0.28), radius: 30, y: 18)
-                Image(systemName: "drop.fill").font(.system(size: 72, weight: .semibold)).foregroundStyle(.white)
-                Image(systemName: "sparkle").font(.system(size: 28, weight: .bold)).foregroundStyle(.white).offset(x: 48, y: -46)
-            }
-            Text("Il tuo ciclo, più semplice da capire").font(.system(size: 34, weight: .bold, design: .rounded)).multilineTextAlignment(.center)
-            Text("Segui il ciclo, registra sintomi e benessere e scopri i tuoi ritmi in uno spazio privato e intuitivo.").foregroundStyle(.secondary).multilineTextAlignment(.center).font(.title3)
+            ZStack { Circle().fill(.ultraThinMaterial).frame(width: 210, height: 210).overlay(Circle().stroke(.white.opacity(0.8))); Image(systemName: "moon.stars.fill").font(.system(size: 86)).foregroundStyle(LinearGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac], startPoint: .topLeading, endPoint: .bottomTrailing)) }
+            VStack(spacing: 12) { Text("Benvenuta in Lunaria").font(.system(size: 35, weight: .bold, design: .rounded)).multilineTextAlignment(.center); Text("Un modo delicato, semplice e privato per conoscere meglio il tuo ciclo.").font(.title3).foregroundStyle(.secondary).multilineTextAlignment(.center) }
             Spacer()
-        }.padding(.horizontal, 6)
+        }.padding(.horizontal, 28)
     }
 
     private var profile: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Image(systemName: "person.crop.circle.fill").font(.system(size: 82)).foregroundStyle(LinearGradient(colors: [.lunariaRose, .lunariaPlum], startPoint: .topLeading, endPoint: .bottomTrailing))
-            Text("Come ti chiami?").font(.system(size: 34, weight: .bold, design: .rounded)).multilineTextAlignment(.center)
-            Text("Useremo il tuo nome per rendere Lunaria più personale.").font(.title3).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            GlassCard {
-                TextField("Il tuo nome", text: $name)
-                    .font(.title3.weight(.semibold))
-                    .textInputAutocapitalization(.words)
-                    .autocorrectionDisabled()
-                    .submitLabel(.continue)
-                    .focused($nameFieldFocused)
-            }
-            Spacer()
-        }
+        VStack(spacing: 24) { Spacer(); Image(systemName: "person.crop.circle.fill.badge.plus").font(.system(size: 88)).foregroundStyle(.lunaBerry); VStack(spacing: 9) { Text("Come ti chiami?").font(.system(size: 34, weight: .bold, design: .rounded)); Text("Useremo il tuo nome per rendere Lunaria più personale.").foregroundStyle(.secondary).multilineTextAlignment(.center) }; TextField("Il tuo nome", text: $name).font(.title3.bold()).textInputAutocapitalization(.words).padding(18).background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(.white.opacity(0.7))); Spacer() }.padding(.horizontal, 28)
     }
 
-    private var setup: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: 24) {
-                Image(systemName: "calendar.badge.clock").font(.largeTitle).foregroundStyle(Color.lunariaRose)
-                Text("Conosciamo il tuo ciclo").font(.system(size: 30, weight: .bold, design: .rounded))
-                DatePicker("Inizio ultimo ciclo", selection: $lastPeriod, in: ...Date(), displayedComponents: .date)
-                Divider()
-                Stepper("Ciclo medio: \(cycleLength) giorni", value: $cycleLength, in: 20...45)
-                Stepper("Mestruazioni: \(periodLength) giorni", value: $periodLength, in: 2...10)
-                Spacer()
-            }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        }
+    private var cycle: some View {
+        ScrollView { VStack(spacing: 24) { Spacer(minLength: 45); Image(systemName: "calendar.badge.clock").font(.system(size: 78)).foregroundStyle(.lunaBerry); VStack(spacing: 8) { Text("Impostiamo il tuo ciclo").font(.system(size: 32, weight: .bold, design: .rounded)); Text("Potrai modificare tutto in qualsiasi momento.").foregroundStyle(.secondary) }; FrostCard(radius: 28, padding: 20) { VStack(spacing: 18) { DatePicker("Ultimo inizio", selection: $lastStart, in: ...Date(), displayedComponents: .date); Divider(); Stepper("Durata ciclo: \(cycleLength) giorni", value: $cycleLength, in: 20...45); Divider(); Stepper("Mestruazioni: \(periodLength) giorni", value: $periodLength, in: 2...10) } } }.padding(.horizontal, 24) }
     }
 
-    private var privacy: some View {
-        VStack(spacing: 26) {
-            Spacer()
-            Image(systemName: "lock.shield.fill").font(.system(size: 78)).foregroundStyle(LinearGradient(colors: [.lunariaRose, .lunariaPlum], startPoint: .top, endPoint: .bottom))
-            Text("La tua privacy viene prima").font(.system(size: 34, weight: .bold, design: .rounded)).multilineTextAlignment(.center)
-            Text("I dati restano sul tuo dispositivo. Dalle impostazioni puoi anche creare un backup e ripristinarlo su un altro iPhone.").font(.title3).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            GlassCard { Label("Nessun account richiesto", systemImage: "checkmark.seal.fill").font(.headline).frame(maxWidth: .infinity, alignment: .leading) }
-            Spacer()
-        }.padding(.horizontal, 4)
+    private func next() {
+        if page < 2 { withAnimation { page += 1 } } else { store.userName = name.trimmingCharacters(in: .whitespacesAndNewlines); store.settings = CycleSettings(lastPeriodStart: lastStart, averageCycleLength: cycleLength, averagePeriodLength: periodLength); store.hasCompletedOnboarding = true; store.syncToICloud() }
     }
 }
