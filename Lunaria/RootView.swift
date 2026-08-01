@@ -18,7 +18,7 @@ struct MainTabView: View {
             InsightsView().tabItem { Label("Analisi", systemImage: "chart.xyaxis.line") }
             SettingsView().tabItem { Label("Profilo", systemImage: "person.crop.circle") }
         }
-        .tint(.lunaBerry)
+        .tint(Color.lunaBerry)
         .toolbarBackground(.ultraThinMaterial, for: .tabBar)
     }
 }

@@ -20,7 +20,7 @@ struct HomeView: View {
                         cycleHero
                         SectionHeader(title: "In breve", subtitle: "Le informazioni più importanti di oggi")
                         HStack(spacing: 12) {
-                            miniCard(icon: "calendar", title: "Prossimo ciclo", value: store.italianDate(store.nextPeriodStart, style: "d MMM"), tint: .lunaBerry)
+                            miniCard(icon: "calendar", title: "Prossimo ciclo", value: store.italianDate(store.nextPeriodStart, style: "d MMM"), tint: Color.lunaBerry)
                             miniCard(icon: "leaf.fill", title: "Fertilità", value: "\(store.italianDate(store.fertileStart, style: "d MMM"))–\(store.italianDate(store.fertileEnd, style: "d MMM"))", tint: .green)
                         }
                         journalCard
@@ -37,13 +37,13 @@ struct HomeView: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(store.userName.isEmpty ? "CIAO" : "CIAO, \(store.userName.uppercased())").font(.caption.weight(.bold)).tracking(1.5).foregroundStyle(.lunaBerry)
+                Text(store.userName.isEmpty ? "CIAO" : "CIAO, \(store.userName.uppercased())").font(.caption.weight(.bold)).tracking(1.5).foregroundStyle(Color.lunaBerry)
                 Text("Il tuo ritmo, oggi").font(.system(size: 31, weight: .bold, design: .rounded))
             }
             Spacer()
             Button { showingLog = true } label: {
                 Image(systemName: "plus").font(.title3.bold()).foregroundStyle(.white).frame(width: 50, height: 50)
-                    .background(LinearGradient(colors: [.lunaBlush, .lunaBerry], startPoint: .topLeading, endPoint: .bottomTrailing), in: Circle())
+                    .background(LinearGradient(colors: [Color.lunaBlush, Color.lunaBerry], startPoint: .topLeading, endPoint: .bottomTrailing), in: Circle())
                     .shadow(color: Color.lunaBerry.opacity(0.25), radius: 12, y: 7)
             }
         }
@@ -56,7 +56,7 @@ struct HomeView: View {
                 ZStack {
                     Circle().stroke(Color.primary.opacity(0.06), lineWidth: 22)
                     Circle().trim(from: 0, to: progress)
-                        .stroke(AngularGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac, .lunaBlush], center: .center), style: StrokeStyle(lineWidth: 22, lineCap: .round))
+                        .stroke(AngularGradient(colors: [Color.lunaBlush, Color.lunaBerry, Color.lunaLilac, Color.lunaBlush], center: .center), style: StrokeStyle(lineWidth: 22, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                     Circle().fill(.thinMaterial).padding(30)
                     VStack(spacing: 4) {
@@ -84,11 +84,11 @@ struct HomeView: View {
         let log = store.log(for: Date())
         return FrostCard(radius: 28, padding: 20) {
             VStack(alignment: .leading, spacing: 16) {
-                HStack { VStack(alignment: .leading, spacing: 3) { Text("Diario di oggi").font(.title3.bold()); Text(store.italianDate(Date(), style: "EEEE d MMMM")).font(.subheadline).foregroundStyle(.secondary) }; Spacer(); Button("Modifica") { showingLog = true }.font(.subheadline.bold()).foregroundStyle(.lunaBerry) }
+                HStack { VStack(alignment: .leading, spacing: 3) { Text("Diario di oggi").font(.title3.bold()); Text(store.italianDate(Date(), style: "EEEE d MMMM")).font(.subheadline).foregroundStyle(.secondary) }; Spacer(); Button("Modifica") { showingLog = true }.font(.subheadline.bold()).foregroundStyle(Color.lunaBerry) }
                 Divider().opacity(0.5)
                 HStack(spacing: 10) {
                     LunaBadge(title: log.flow.rawValue, icon: log.flow.icon)
-                    LunaBadge(title: log.symptoms.isEmpty ? "Nessun sintomo" : "\(log.symptoms.count) sintomi", icon: "heart.text.square", tint: .lunaLilac)
+                    LunaBadge(title: log.symptoms.isEmpty ? "Nessun sintomo" : "\(log.symptoms.count) sintomi", icon: "heart.text.square", tint: Color.lunaLilac)
                 }
             }
         }

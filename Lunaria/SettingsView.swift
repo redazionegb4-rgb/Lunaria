@@ -49,14 +49,14 @@ struct SettingsView: View {
     private var profileHeader: some View {
         FrostCard(radius: 32, padding: 22) {
             HStack(spacing: 16) {
-                ZStack { Circle().fill(LinearGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac], startPoint: .topLeading, endPoint: .bottomTrailing)); Image(systemName: "moon.stars.fill").font(.title).foregroundStyle(.white) }.frame(width: 64, height: 64)
-                VStack(alignment: .leading, spacing: 5) { Text("Il tuo profilo").font(.caption.bold()).foregroundStyle(.lunaBerry); TextField("Nome", text: $store.userName).font(.title2.bold()).textInputAutocapitalization(.words) }
+                ZStack { Circle().fill(LinearGradient(colors: [Color.lunaBlush, Color.lunaBerry, Color.lunaLilac], startPoint: .topLeading, endPoint: .bottomTrailing)); Image(systemName: "moon.stars.fill").font(.title).foregroundStyle(.white) }.frame(width: 64, height: 64)
+                VStack(alignment: .leading, spacing: 5) { Text("Il tuo profilo").font(.caption.bold()).foregroundStyle(Color.lunaBerry); TextField("Nome", text: $store.userName).font(.title2.bold()).textInputAutocapitalization(.words) }
                 Spacer()
             }
         }
     }
 
     private func settingsCard<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        FrostCard(radius: 28, padding: 20) { VStack(alignment: .leading, spacing: 14) { Label(title, systemImage: icon).font(.title3.bold()).foregroundStyle(.lunaInk); content() }.frame(maxWidth: .infinity, alignment: .leading) }
+        FrostCard(radius: 28, padding: 20) { VStack(alignment: .leading, spacing: 14) { Label(title, systemImage: icon).font(.title3.bold()).foregroundStyle(Color.lunaInk); content() }.frame(maxWidth: .infinity, alignment: .leading) }
     }
 }

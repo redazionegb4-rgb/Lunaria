@@ -48,7 +48,7 @@ struct PrimaryLunaButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(
-                LinearGradient(colors: [.lunaBlush, .lunaBerry, .lunaLilac], startPoint: .leading, endPoint: .trailing),
+                LinearGradient(colors: [Color.lunaBlush, Color.lunaBerry, Color.lunaLilac], startPoint: .leading, endPoint: .trailing),
                 in: RoundedRectangle(cornerRadius: 18, style: .continuous)
             )
             .shadow(color: Color.lunaBerry.opacity(0.24), radius: 16, y: 8)
